@@ -14,12 +14,13 @@ import {
 import { BuiltInProviderType } from 'next-auth/providers/index'
 
 const Nav = () => {
-  const isUserLoggedIn = true
+  const { data: session } = useSession()
+
   const [providers, setProviders] = useState<Record<
     LiteralUnion<BuiltInProviderType, string>,
     ClientSafeProvider
-  > | null>(null);
-  const [toggleDropDown, setToggleDropDown] = useState(false);
+  > | null>(null)
+  const [toggleDropDown, setToggleDropDown] = useState(false)
 
   useEffect(() => {
     const setProvidersHelper = async () => {
@@ -41,8 +42,9 @@ const Nav = () => {
         />
         <p className="logo_text">HeyPrompt</p>
       </Link>
+
       <div className="hidden sm:flex">
-        {isUserLoggedIn ? (
+        {session?.user ? (
           <div className="flex gap-3 md:gap-5">
             <Link href="/create-prompt" className="black_btn">
               Create Prompt
@@ -56,7 +58,7 @@ const Nav = () => {
             </button>
             <Link href="/profile">
               <Image
-                src="/assets/images/logo.svg"
+                src={session.user.image || '/assets/images/profile.svg'}
                 width={37}
                 height={37}
                 className="rounded-full"
@@ -82,34 +84,46 @@ const Nav = () => {
       </div>
 
       <div className="relative flex sm:hidden">
-        {isUserLoggedIn ? (
+        {session?.user ? (
           <div className="flex">
             <Image
-              src="/assets/images/logo.svg"
+              src={session.user.image || '/assets/images/profile.svg'}
               width={37}
               height={37}
               className="rounded-full"
               alt="Profile"
-              onClick={() => {setToggleDropDown((prev) => !prev)}}
+              onClick={() => {
+                setToggleDropDown((prev) => !prev)
+              }}
             />
-            {
-              toggleDropDown && (
-                <div className='dropdown'>
-                  <Link href="/profile" className="dropdown_link" onClick={() => setToggleDropDown(false)}>
-                    My Profile
-                  </Link>
-                  <Link href="/create-prompt" className="dropdown_link" onClick={() => setToggleDropDown(false)}>
-                    Create Prompt
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {setToggleDropDown(false); signOut();}}
-                    className="mt-5 w-full black_btn">
-                      Sign Out
-                  </button>
-                </div>
-              )
-            }
+            {toggleDropDown && (
+              <div className="dropdown">
+                <Link
+                  href="/profile"
+                  className="dropdown_link"
+                  onClick={() => setToggleDropDown(false)}
+                >
+                  My Profile
+                </Link>
+                <Link
+                  href="/create-prompt"
+                  className="dropdown_link"
+                  onClick={() => setToggleDropDown(false)}
+                >
+                  Create Prompt
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setToggleDropDown(false)
+                    signOut()
+                  }}
+                  className="black_btn mt-5 w-full"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>
